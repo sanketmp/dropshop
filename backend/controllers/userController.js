@@ -11,12 +11,14 @@ const createUser = asyncHandler(async (req, res) => {
   }
 
   const userExists = await User.findOne({ email });
-  if (userExists) res.status(400).send("User already exists");
+  if (userExists) {
+    res.status(400).send("Email already exists");
+  }
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  const newUser = new User({ username, email, password: hashedPassword });
 
+  const newUser = new User({ username, email, password: hashedPassword });
   try {
     await newUser.save();
     createToken(res, newUser._id);
@@ -67,7 +69,7 @@ const logoutCurrentUser = asyncHandler(async (req, res) => {
     expires: new Date(0),
   });
 
-  res.status(200).json({ message: "Logged out successfully" });
+  res.status(200).json({ message: "Logged out successfully." });
 });
 
 const getAllUsers = asyncHandler(async (req, res) => {
@@ -123,11 +125,11 @@ const deleteUserById = asyncHandler(async (req, res) => {
   if (user) {
     if (user.isAdmin) {
       res.status(400);
-      throw new Error("Cannot delete admin user");
+      throw new Error("Cannot delete admin.");
     }
 
     await User.deleteOne({ _id: user._id });
-    res.json({ message: "User removed" });
+    res.json({ message: `User ${user._id} removed.` });
   } else {
     res.status(404);
     throw new Error("User not found.");
@@ -141,7 +143,7 @@ const getUserById = asyncHandler(async (req, res) => {
     res.json(user);
   } else {
     res.status(404);
-    throw new Error("User not found");
+    throw new Error("No such user.");
   }
 });
 
